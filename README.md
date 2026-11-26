@@ -18,6 +18,27 @@ The agent holds no credentials of its own, and every action is traceable to a pe
 
 Product page: https://izylifesolutions.com/products/izytrust/
 
+## Early access: what to expect
+
+IzyTrust is at version 0.x. The demo below runs end to end on k3d, and we test each release
+against it. Before you try it on your own systems, note what the current release does not do:
+
+- **Keycloak only.** Sign-in and token exchange need Keycloak 26 or later with Token Exchange
+  enabled on the IzyTrust client. Entra ID, Okta and other providers are not supported yet.
+- **Scope checks only.** A tool is allowed or denied by the scope it requires. Policies on
+  resources or context (OPA, Cedar) and human approval for destructive operations are on the
+  roadmap.
+- **One replica.** Sessions are stored on a ReadWriteOnce volume, so the chart runs a single
+  pod. There is no high availability yet.
+- **Tested clients.** We test with Claude Code. Other MCP clients that support streamable HTTP
+  should work, but sign-in by URL elicitation depends on the client; otherwise IzyTrust returns
+  a login link.
+- **Not for production.** The evaluation licence does not cover production use, and there is
+  no support unless agreed in writing.
+
+If something does not work as described here, open an issue in this repository or
+[contact us](https://izylifesolutions.com/?service=izytrust#contacts).
+
 ## What is in this repository
 
 | Path | Contents |
