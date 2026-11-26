@@ -33,7 +33,12 @@ stored on GitHub Container Registry. The IzyTrust source code is not in this rep
 
 The chart and the images are private. To try IzyTrust:
 
-1. Ask for access at https://izylifesolutions.com/#contacts, giving your GitHub username.
+1. Ask for access in one of two ways:
+   - [open a "Request demo access" issue](https://github.com/gcassata74/izytrust-examples/issues/new?template=demo-access.yml)
+     (public; access goes to the account that opens it), or
+   - use the [contact form](https://izylifesolutions.com/?service=izytrust-demo#contacts)
+     and write your GitHub username in the message.
+
    You will get read access to the three packages.
 2. Create a GitHub personal access token (classic) with the `read:packages` scope only:
    https://github.com/settings/tokens/new?scopes=read:packages
@@ -128,6 +133,6 @@ Agents see the tools as `tickets_search_tickets` and `tickets_close_ticket`.
 IzyTrust is in early access (0.x). The files in this repository are released under the
 Apache License 2.0. The IzyTrust chart and container images are proprietary software of
 Izylife Solutions s.r.l. and are licensed under a written agreement. For access, or for
-an assessment of your use case, contact us at https://izylifesolutions.com/#contacts.
+an assessment of your use case, contact us at https://izylifesolutions.com/?service=izytrust-demo#contacts.
 
 The demo uses Keycloak in dev mode with fixed passwords. Do not expose it to a network.
