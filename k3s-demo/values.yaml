@@ -1,10 +1,6 @@
 # Helm values for the local k3s / k3d demo.
 publicUrl: http://localhost:8001
 
-# Secret for the private images on ghcr.io (see README, step 2)
-imagePullSecrets:
-  - name: ghcr
-
 keycloak:
   publicUrl: http://localhost:8080
   internalUrl: http://keycloak.izytrust.svc:8080

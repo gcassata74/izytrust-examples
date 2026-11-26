@@ -26,29 +26,9 @@ Product page: https://izylifesolutions.com/products/izytrust/
 | `k3s-demo/values.yaml` | Helm values for the demo, including the upstream registry |
 
 The Helm chart (`oci://ghcr.io/gcassata74/charts/izytrust`) and the images
-`ghcr.io/gcassata74/izytrust` and `ghcr.io/gcassata74/izytrust-kube-mcp` are signed and
-stored on GitHub Container Registry. The IzyTrust source code is not in this repository.
-
-## Get access to the images
-
-The chart and the images are private. To try IzyTrust:
-
-1. Ask for access in one of two ways:
-   - [open a "Request demo access" issue](https://github.com/gcassata74/izytrust-examples/issues/new?template=demo-access.yml)
-     (public; access goes to the account that opens it), or
-   - use the [contact form](https://izylifesolutions.com/?service=izytrust-demo#contacts)
-     and write your GitHub username in the message.
-
-   You will get read access to the three packages.
-2. Create a GitHub personal access token (classic) with the `read:packages` scope only:
-   https://github.com/settings/tokens/new?scopes=read:packages
-3. Log in to the registry with Helm:
-
-```bash
-export GHCR_USER=<your-github-username>
-export GHCR_TOKEN=<your-token>
-echo "$GHCR_TOKEN" | helm registry login ghcr.io -u "$GHCR_USER" --password-stdin
-```
+`ghcr.io/gcassata74/izytrust` and `ghcr.io/gcassata74/izytrust-kube-mcp` are public, signed
+with cosign and stored on GitHub Container Registry. The IzyTrust source code is not in
+this repository.
 
 To read the chart's templates and default values:
 
@@ -58,17 +38,15 @@ helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.2 --untar
 
 ## Run the demo on k3d (k3s in Docker)
 
-You need Docker, [k3d](https://k3d.io), kubectl, Helm and access to the images (see above).
+You need Docker, [k3d](https://k3d.io), kubectl and Helm.
 
 ```bash
 # 1. Cluster with ports 8001 (IzyTrust) and 8080 (Keycloak) on localhost
 k3d cluster create izytrust-demo \
   -p "8001:30001@server:0" -p "8080:30080@server:0"
 
-# 2. Namespaces and secrets (ghcr: pull secret for the private images)
+# 2. Namespaces and secrets
 kubectl apply -f k3s-demo/namespaces.yaml
-kubectl -n izytrust create secret docker-registry ghcr \
-  --docker-server=ghcr.io --docker-username="$GHCR_USER" --docker-password="$GHCR_TOKEN"
 kubectl -n izytrust create secret generic izytrust-oidc \
   --from-literal=client-secret="$(openssl rand -hex 24)"
 kubectl -n izytrust create secret generic keycloak-admin \
@@ -110,7 +88,7 @@ Sign in as `alice` and it goes through. In both cases the decision is in the aud
 `/data/audit.jsonl` in the pod):
 
 ```bash
-kubectl -n izytrust logs deploy/izytrust | grep '^AUDIT'
+kubectl -n izytrust logs deploy/izytrust -c izytrust | grep '^AUDIT'
 ```
 
 The example Kube MCP can only touch the `demo` namespace: its ServiceAccount has a Role

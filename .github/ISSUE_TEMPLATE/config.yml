@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Contact form (email reply)
-    url: https://izylifesolutions.com/?service=izytrust-demo#contacts
-    about: Ask for demo access or an assessment without opening a public issue.
+  - name: Licence or assessment (email reply)
+    url: https://izylifesolutions.com/?service=izytrust#contacts
+    about: Ask about a licence, support or an assessment of your agents and MCP servers.
