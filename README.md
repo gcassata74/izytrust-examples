@@ -25,9 +25,25 @@ Product page: https://izylifesolutions.com/products/izytrust/
 | `k3s-demo/` | Keycloak with a demo realm, two example upstream MCP servers, a demo app and a NetworkPolicy |
 | `k3s-demo/values.yaml` | Helm values for the demo, including the upstream registry |
 
-The Helm chart is published as an OCI artifact at `oci://ghcr.io/gcassata74/charts/izytrust`
-and pulls the signed images `ghcr.io/gcassata74/izytrust` and
-`ghcr.io/gcassata74/izytrust-kube-mcp`. The IzyTrust source code is not in this repository.
+The Helm chart (`oci://ghcr.io/gcassata74/charts/izytrust`) and the images
+`ghcr.io/gcassata74/izytrust` and `ghcr.io/gcassata74/izytrust-kube-mcp` are signed and
+stored on GitHub Container Registry. The IzyTrust source code is not in this repository.
+
+## Get access to the images
+
+The chart and the images are private. To try IzyTrust:
+
+1. Ask for access at https://izylifesolutions.com/#contacts, giving your GitHub username.
+   You will get read access to the three packages.
+2. Create a GitHub personal access token (classic) with the `read:packages` scope only:
+   https://github.com/settings/tokens/new?scopes=read:packages
+3. Log in to the registry with Helm:
+
+```bash
+export GHCR_USER=<your-github-username>
+export GHCR_TOKEN=<your-token>
+echo "$GHCR_TOKEN" | helm registry login ghcr.io -u "$GHCR_USER" --password-stdin
+```
 
 To read the chart's templates and default values:
 
@@ -37,15 +53,17 @@ helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.1 --untar
 
 ## Run the demo on k3d (k3s in Docker)
 
-You need Docker, [k3d](https://k3d.io), kubectl and Helm.
+You need Docker, [k3d](https://k3d.io), kubectl, Helm and access to the images (see above).
 
 ```bash
 # 1. Cluster with ports 8001 (IzyTrust) and 8080 (Keycloak) on localhost
 k3d cluster create izytrust-demo \
   -p "8001:30001@server:0" -p "8080:30080@server:0"
 
-# 2. Namespaces and secrets
+# 2. Namespaces and secrets (ghcr: pull secret for the private images)
 kubectl apply -f k3s-demo/namespaces.yaml
+kubectl -n izytrust create secret docker-registry ghcr \
+  --docker-server=ghcr.io --docker-username="$GHCR_USER" --docker-password="$GHCR_TOKEN"
 kubectl -n izytrust create secret generic izytrust-oidc \
   --from-literal=client-secret="$(openssl rand -hex 24)"
 kubectl -n izytrust create secret generic keycloak-admin \
@@ -108,8 +126,8 @@ Agents see the tools as `tickets_search_tickets` and `tickets_close_ticket`.
 ## Status and licence
 
 IzyTrust is in early access (0.x). The files in this repository are released under the
-Apache License 2.0. The IzyTrust container images are proprietary software of
-Izylife Solutions s.r.l.: to use them beyond this demo, or for an assessment of your
-use case, contact us at https://izylifesolutions.com/#contacts.
+Apache License 2.0. The IzyTrust chart and container images are proprietary software of
+Izylife Solutions s.r.l. and are licensed under a written agreement. For access, or for
+an assessment of your use case, contact us at https://izylifesolutions.com/#contacts.
 
 The demo uses Keycloak in dev mode with fixed passwords. Do not expose it to a network.
