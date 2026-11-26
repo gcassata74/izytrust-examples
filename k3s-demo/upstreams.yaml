@@ -55,7 +55,7 @@ spec:
       securityContext: {runAsNonRoot: true, runAsUser: 10001}
       containers:
         - name: kube-mcp
-          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.1
+          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.2
           imagePullPolicy: IfNotPresent
           command: ["python", "-m", "izytrust.kube_mcp"]
           env:
@@ -105,7 +105,7 @@ spec:
       securityContext: {runAsNonRoot: true, runAsUser: 10001}
       containers:
         - name: notes-mcp
-          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.1
+          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.2
           imagePullPolicy: IfNotPresent
           command: ["python", "-m", "izytrust.notes_mcp"]
           env:

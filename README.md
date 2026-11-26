@@ -53,7 +53,7 @@ echo "$GHCR_TOKEN" | helm registry login ghcr.io -u "$GHCR_USER" --password-stdi
 To read the chart's templates and default values:
 
 ```bash
-helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.1 --untar
+helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.2 --untar
 ```
 
 ## Run the demo on k3d (k3s in Docker)
@@ -79,7 +79,7 @@ kubectl apply -k k3s-demo
 kubectl -n izytrust rollout status deploy/keycloak --timeout=5m
 
 # 4. IzyTrust
-helm install izytrust oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.1 \
+helm install izytrust oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.2 \
   -n izytrust -f k3s-demo/values.yaml
 kubectl -n izytrust rollout status deploy/izytrust
 ```
@@ -138,7 +138,9 @@ Agents see the tools as `tickets_search_tickets` and `tickets_close_ticket`.
 
 IzyTrust is in early access (0.x). The files in this repository are released under the
 Apache License 2.0. The IzyTrust chart and container images are proprietary software of
-Izylife Solutions s.r.l. and are licensed under a written agreement. For access, or for
-an assessment of your use case, contact us at https://izylifesolutions.com/?service=izytrust-demo#contacts.
+Izylife Solutions s.r.l. You may evaluate them free of charge for up to 30 days and 5 users,
+not in production; the full terms are in the LICENSE file shipped in the image
+(`/app/LICENSE`). Any other use requires a written agreement. For a licence, or for an
+assessment of your use case, contact us at https://izylifesolutions.com/?service=izytrust-demo#contacts.
 
 The demo uses Keycloak in dev mode with fixed passwords. Do not expose it to a network.
