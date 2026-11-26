@@ -1,0 +1,134 @@
+# Downstream MCPs: ClusterIP only, never exposed outside the cluster.
+# --- Kube MCP: ServiceAccount with minimal RBAC on the demo namespace only ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-mcp
+  namespace: izytrust
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kube-mcp
+  namespace: demo
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [get, list]
+  - apiGroups: [apps]
+    resources: [deployments/scale]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kube-mcp
+  namespace: demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-mcp
+subjects:
+  - kind: ServiceAccount
+    name: kube-mcp
+    namespace: izytrust
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-mcp
+  namespace: izytrust
+  labels: {app: kube-mcp, izytrust/role: upstream}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: kube-mcp}
+  template:
+    metadata:
+      labels: {app: kube-mcp, izytrust/role: upstream}
+    spec:
+      serviceAccountName: kube-mcp
+      securityContext: {runAsNonRoot: true, runAsUser: 10001}
+      containers:
+        - name: kube-mcp
+          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.1
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "izytrust.kube_mcp"]
+          env:
+            - {name: KC_ISSUER, value: "http://localhost:8080/realms/izytrust"}
+            - {name: KC_JWKS_URL, value: "http://keycloak.izytrust.svc:8080/realms/izytrust/protocol/openid-connect/certs"}
+          ports:
+            - {name: http, containerPort: 8000}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 20m, memory: 96Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-mcp
+  namespace: izytrust
+spec:
+  type: ClusterIP
+  selector: {app: kube-mcp}
+  ports:
+    - {name: http, port: 8000, targetPort: http}
+---
+# --- Notes MCP: a second minimal upstream (same image), no Kubernetes access ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-mcp
+  namespace: izytrust
+  labels: {app: notes-mcp, izytrust/role: upstream}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: notes-mcp}
+  template:
+    metadata:
+      labels: {app: notes-mcp, izytrust/role: upstream}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001}
+      containers:
+        - name: notes-mcp
+          image: ghcr.io/gcassata74/izytrust-kube-mcp:0.1.1
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "izytrust.notes_mcp"]
+          env:
+            - {name: KC_ISSUER, value: "http://localhost:8080/realms/izytrust"}
+            - {name: KC_JWKS_URL, value: "http://keycloak.izytrust.svc:8080/realms/izytrust/protocol/openid-connect/certs"}
+          ports:
+            - {name: http, containerPort: 8000}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 20m, memory: 96Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notes-mcp
+  namespace: izytrust
+spec:
+  type: ClusterIP
+  selector: {app: notes-mcp}
+  ports:
+    - {name: http, port: 8000, targetPort: http}

@@ -1,0 +1,61 @@
+# Keycloak 26 in dev mode for the demo (H2 in memory: data is lost on restart).
+# For production use your own Keycloak with a real database.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: izytrust
+  labels: {app: keycloak}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: keycloak}
+  template:
+    metadata:
+      labels: {app: keycloak}
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.4
+          args: ["start-dev", "--import-realm"]
+          env:
+            - {name: KC_HOSTNAME, value: "http://localhost:8080"}
+            - {name: KC_HTTP_ENABLED, value: "true"}
+            - {name: KC_HEALTH_ENABLED, value: "true"}
+            - {name: KC_BOOTSTRAP_ADMIN_USERNAME, value: admin}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom: {secretKeyRef: {name: keycloak-admin, key: password}}
+            # substituted into realm-export.json at import time
+            - name: IZYTRUST_CLIENT_SECRET
+              valueFrom: {secretKeyRef: {name: izytrust-oidc, key: client-secret}}
+            - {name: IZYTRUST_PUBLIC_URL, value: "http://localhost:8001"}
+          ports:
+            - {name: http, containerPort: 8080}
+            - {name: management, containerPort: 9000}
+          readinessProbe:
+            httpGet: {path: /health/ready, port: management}
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          startupProbe:
+            httpGet: {path: /health/started, port: management}
+            periodSeconds: 5
+            failureThreshold: 60
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {memory: 1536Mi}
+          volumeMounts:
+            - {name: realm, mountPath: /opt/keycloak/data/import, readOnly: true}
+      volumes:
+        - name: realm
+          configMap: {name: keycloak-realm}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: izytrust
+spec:
+  type: NodePort
+  selector: {app: keycloak}
+  ports:
+    - {name: http, port: 8080, targetPort: http, nodePort: 30080}

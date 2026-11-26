@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - keycloak.yaml
+  - upstreams.yaml
+  - demo-app.yaml
+  - networkpolicy.yaml
+configMapGenerator:
+  - name: keycloak-realm
+    namespace: izytrust
+    files: [realm-export.json]
+generatorOptions:
+  disableNameSuffixHash: true

@@ -1,0 +1,34 @@
+# Helm values for the local k3s / k3d demo.
+publicUrl: http://localhost:8001
+
+keycloak:
+  publicUrl: http://localhost:8080
+  internalUrl: http://keycloak.izytrust.svc:8080
+  realm: izytrust
+  clientId: izytrust
+  existingSecret: izytrust-oidc
+
+service:
+  type: NodePort
+  nodePort: 30001
+
+persistence:
+  enabled: true
+  fixPermissions: true   # k3s local-path ignores fsGroup
+
+# Upstream registry: a tool that is not listed is not exposed (default deny).
+# The value is the scope (Keycloak realm role) the user needs to call the tool.
+upstreams:
+  - name: kube
+    url: http://kube-mcp.izytrust.svc:8000/mcp
+    audience: kube-mcp
+    tools:
+      list_pods: read
+      get_deployment: read
+      scale_deployment: write
+  - name: notes
+    url: http://notes-mcp.izytrust.svc:8000/mcp
+    audience: notes-mcp
+    tools:
+      list_notes: read
+      create_note: write
