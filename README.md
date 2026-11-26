@@ -33,7 +33,7 @@ this repository.
 To read the chart's templates and default values:
 
 ```bash
-helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.2 --untar
+helm pull oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.3 --untar
 ```
 
 ## Run the demo on k3d (k3s in Docker)
@@ -57,7 +57,7 @@ kubectl apply -k k3s-demo
 kubectl -n izytrust rollout status deploy/keycloak --timeout=5m
 
 # 4. IzyTrust
-helm install izytrust oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.2 \
+helm install izytrust oci://ghcr.io/gcassata74/charts/izytrust --version 0.1.3 \
   -n izytrust -f k3s-demo/values.yaml
 kubectl -n izytrust rollout status deploy/izytrust
 ```
