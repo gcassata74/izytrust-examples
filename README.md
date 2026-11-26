@@ -119,6 +119,6 @@ Apache License 2.0. The IzyTrust chart and container images are proprietary soft
 Izylife Solutions s.r.l. You may evaluate them free of charge for up to 30 days and 5 users,
 not in production; the full terms are in the LICENSE file shipped in the image
 (`/app/LICENSE`). Any other use requires a written agreement. For a licence, or for an
-assessment of your use case, contact us at https://izylifesolutions.com/?service=izytrust-demo#contacts.
+assessment of your use case, contact us at https://izylifesolutions.com/?service=izytrust#contacts.
 
 The demo uses Keycloak in dev mode with fixed passwords. Do not expose it to a network.
