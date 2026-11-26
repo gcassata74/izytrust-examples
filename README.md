@@ -93,23 +93,29 @@ change `publicUrl`, `KC_HOSTNAME` and `IZYTRUST_PUBLIC_URL` to match your host.
 claude mcp add --transport http izytrust http://localhost:8001/mcp
 ```
 
-Then ask: *"scale demo-app to 3 replicas"*. IzyTrust answers with a login link. The realm
-has two users:
+Then ask: *"scale demo-app to 3 replicas"*. IzyTrust asks you to sign in with Keycloak:
+clients that support URL elicitation open the sign-in page and the call continues after
+login; otherwise the tool returns a link, and you ask again once signed in. The realm has
+two users:
 
 | User | Password | Roles | Can call |
 |---|---|---|---|
-| `alice` | `alice` | reader, writer | every tool, including `kube_scale_deployment` |
+| `alice` | `alice` | reader, writer | every tool, including `kube_scale_deployment` and `notes_create_note` |
 | `bob` | `bob` | reader | `kube_list_pods`, `kube_get_deployment`, `notes_list_notes` |
 
+Both can also call IzyTrust's own tools, `izytrust_whoami` and `izytrust_upstreams`.
+
 Sign in as `bob` and the scale request is denied by IzyTrust before it reaches Kubernetes.
-Sign in as `alice` and it goes through. In both cases the decision is in the audit log:
+Sign in as `alice` and it goes through. In both cases the decision is in the audit log (JSON lines, also written to
+`/data/audit.jsonl` in the pod):
 
 ```bash
-kubectl -n izytrust logs deploy/izytrust | grep audit
+kubectl -n izytrust logs deploy/izytrust | grep '^AUDIT'
 ```
 
 The example Kube MCP can only touch the `demo` namespace: its ServiceAccount has a Role
-there and nowhere else, and it scales `demo-app` between 0 and 5 replicas only.
+there and nowhere else, and it scales `demo-app` between 0 and 5 replicas only. It also
+checks the token's audience and scope again on its side.
 
 ## Connect your own MCP servers
 
